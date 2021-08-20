@@ -140,8 +140,8 @@ def get_nodes_remain(
     nodes_remain = sorted(nodes_remain, key=lambda x: len(x.unpossible_colors))
     return nodes_remain
 
-def update_queue(
-    queue: typing.List[Solver_Node],
+def update_stack(
+    stack: typing.List[Solver_Node],
     graph_node: Node,
     solver_node: Solver_Node,
     choices: typing.Set[int],
@@ -165,12 +165,12 @@ def update_queue(
         len_colors = len({solver_node_sol_copy[x].color for x in solver_node_sol_copy})
 
         if len_colors < min_len_colors:
-            queue.append(Solver_Node(
+            stack.append(Solver_Node(
                 id = solver_node.id + 1,
                 parent_id = solver_node.id,
                 nodes_remain = nodes_remain_c,
                 solution = solver_node_sol_copy))
-        # queue.append(S_Node(id = idx, parent_id = s_node.id, nodes_remain=p_nodes_remain_c, solution=s_node_solution_c))
+        # stack.append(S_Node(id = idx, parent_id = s_node.id, nodes_remain=p_nodes_remain_c, solution=s_node_solution_c))
 
 def opt(graph: typing.Dict[int, Node]) -> typing.Tuple[int, typing.List[int]]:
     start_time = time.time()
@@ -179,10 +179,10 @@ def opt(graph: typing.Dict[int, Node]) -> typing.Tuple[int, typing.List[int]]:
     min_len_colors, best_solution = greedy(graph)
     colors = set(range(min_len_colors))
 
-    queue = [initialize_root(graph)]
+    stack = [initialize_root(graph)]
 
-    while queue and time.time() - start_time < 60*5:
-        solver_node = queue.pop()
+    while stack and time.time() - start_time < 60*5:
+        solver_node = stack.pop()
 
         nodes_remain = solver_node.nodes_remain
         graph_node = nodes_remain.pop()
@@ -201,7 +201,7 @@ def opt(graph: typing.Dict[int, Node]) -> typing.Tuple[int, typing.List[int]]:
             continue
 
         # create node for every choice
-        update_queue(queue, graph_node, solver_node, choices, min_len_colors)
+        update_stack(stack, graph_node, solver_node, choices, min_len_colors)
 
     # print("Nodes processed: ",nodes_processed_n)
     result = best_solution
